@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek Riwayat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+<!-- Container -->
+<div class="container mx-auto p-6">
+
+    <!-- Header -->
+    <div class="text-center mb-6">
+        <h1 class="text-4xl font-semibold text-blue-500">Cek Riwayat</h1>
+        <p class="mt-2 text-gray-700">Lihat riwayat hasil pengecekan kata terlarang di artikel kamu.</p>
+    </div>
+
+    <!-- History List -->
+    <div id="historyList" class="space-y-4 max-w-3xl mx-auto"></div>
+
+    <!-- Back Button -->
+    <div class="mt-6 text-center">
+        <a href="/" class="inline-block px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none">
+            Kembali ke Halaman Utama
+        </a>
+    </div>
+
+</div>
+
+<script>
+    async function fetchHistory() {
+        try {
+            const response = await fetch('/api/history');
+            const histories = await response.json();
+
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = "";
+
+            if (histories.length === 0) {
+                historyList.innerHTML = '<p class="text-gray-700 text-center">Belum ada riwayat yang ditemukan.</p>';
+                return;
+            }
+
+            histories.forEach(history => {
+                const historyItem = document.createElement('div');
+                historyItem.classList.add("bg-white", "p-6", "rounded-lg", "shadow-lg");
+
+                historyItem.innerHTML = `
+                    <h2 class="text-xl font-semibold text-gray-800">ID Riwayat: ${history.id}</h2>
+                    <p class="text-gray-700">Total Kata Terlarang: <span class="text-red-500 font-bold">${history.totalForbiddenWords}</span></p>
+                    <p class="text-gray-600 text-sm">Dibuat pada: ${new Date(history.createdAt).toLocaleString()}</p>
+                    <a href="/history/${history.id}" class="inline-block mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none">Lihat Detail</a>
+                `;
+
+                historyList.appendChild(historyItem);
+            });
+        } catch (error) {
+            console.error("Error fetching history:", error);
+        }
+    }
+
+    fetchHistory();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+node_modules
+database.sqlite
+package.json
+package-lock.json

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Pengecekan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #2196F3, #1E88E5);
+        }
+    </style>
+</head>
+<body class="font-sans">
+
+<!-- Navbar -->
+<nav class="bg-white shadow-lg p-4 flex justify-between items-center">
+    <h1 class="text-xl font-semibold text-blue-500">Riwayat Pengecekan</h1>
+    <a href="/history-list" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Kembali</a>
+</nav>
+
+<!-- Container -->
+<div class="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+
+    <!-- Header -->
+    <div class="text-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Detail Riwayat</h2>
+        <p class="text-gray-600">Lihat hasil analisis artikel kamu</p>
+    </div>
+
+    <!-- History Details -->
+    <div id="historyDetails" class="space-y-6">
+        <div id="loading" class="text-center text-gray-600">Sedang memuat...</div>
+
+        <div id="historyContent" class="hidden">
+            <!-- Article Text Section -->
+            <div class="border-l-4 border-blue-500 p-4">
+                <h3 class="text-lg font-semibold text-gray-800">Teks Artikel</h3>
+                <p id="articleText" class="text-gray-700 mt-2 whitespace-pre-wrap"></p>
+            </div>
+
+            <!-- Forbidden Words Detected -->
+            <div class="border-l-4 border-red-500 p-4">
+                <h3 class="text-lg font-semibold text-gray-800">Kata Terlarang</h3>
+                <ul id="forbiddenWordsList" class="mt-2 space-y-2 text-gray-700"></ul>
+            </div>
+
+            <!-- Total Forbidden Words -->
+            <div class="p-4 bg-gray-100 rounded-lg">
+                <h3 class="text-lg font-semibold text-gray-800">Total Kata Terlarang</h3>
+                <p id="totalForbiddenWords" class="text-xl font-bold text-red-500 mt-2"></p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="hidden text-center text-red-500 font-semibold"></div>
+    </div>
+
+</div>
+
+<script>
+    async function fetchHistory() {
+        const historyId = window.location.pathname.split('/')[2]; 
+        try {
+            const response = await fetch(`/api/history/${historyId}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Gagal mengambil data");
+            }
+
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('historyContent').classList.remove('hidden');
+
+            document.getElementById('articleText').textContent = data.articleText;
+            document.getElementById('totalForbiddenWords').textContent = data.totalForbiddenWords;
+
+            const forbiddenWordsList = document.getElementById('forbiddenWordsList');
+            forbiddenWordsList.innerHTML = "";
+            data.forbiddenWordsDetected.forEach(word => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${word.word}: ${word.occurrences} kali muncul`;
+                listItem.classList.add('bg-red-100', 'p-2', 'rounded-lg');
+                forbiddenWordsList.appendChild(listItem);
+            });
+
+        } catch (error) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('errorMessage').textContent = error.message;
+            document.getElementById('errorMessage').classList.remove('hidden');
+        }
+    }
+
+    fetchHistory();
+</script>
+
+</body>
+</html>
